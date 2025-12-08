@@ -1,7 +1,7 @@
--   id: add-github-issue-prefix
-    name: Add issue number as commit message prefix
-    description: find github issue number and use prefix commit msg
-    entry: add-github-issue-prefix
-    language: python
-    always_run: false
-    stages: [prepare-commit-msg]
+- id: add-github-issue-prefix
+  name: Add GitHub Issue Prefix
+  description: Automatically add GitHub issue number prefix to commit messages
+  entry: add-github-issue-prefix
+  language: python
+  stages: [prepare-commit-msg]
+  always_run: true

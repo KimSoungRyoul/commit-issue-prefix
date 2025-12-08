@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: add-github-issue-prefix
+        name: Add GitHub Issue Prefix
+        entry: uv run add-github-issue-prefix
+        language: system
+        stages: [prepare-commit-msg]
+        always_run: true
