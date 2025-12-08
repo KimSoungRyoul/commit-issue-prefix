@@ -1,6 +1,6 @@
 # commit-issue-prefix
 
-[![CI](https://github.com/KimSoungRyoul/commit-issue-prefix/actions/workflows/ci.yaml/badge.svg)](https://github.com/KimSoungRyoul/commit-issue-prefix/actions/workflows/ci.yaml)
+[![CI](https://github.com/KimSoungRyoul/add-github-issue-prefix/actions/workflows/ci.yaml/badge.svg)](https://github.com/KimSoungRyoul/add-github-issue-prefix/actions/workflows/ci.yaml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 
@@ -79,6 +79,16 @@ repos:
 | `--regex` | `#\d{1,5}` | Regex pattern to extract issue number from branch name. |
 
 ### Examples
+
+**GitHub-style issue numbers (default):**
+
+```yaml
+args:
+  - --template=[{}]
+  - --regex=#\d{1,5}
+```
+
+This will match branches like `feature/#123-description` and create prefix `[#123]`.
 
 **JIRA-style issue numbers:**
 
