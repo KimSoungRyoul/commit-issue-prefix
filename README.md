@@ -1,7 +1,6 @@
 # add-github-issue-prefix
 
-[![PyPI version](https://badge.fury.io/py/add-github-issue-prefix.svg)](https://badge.fury.io/py/add-github-issue-prefix)
-[![Python](https://img.shields.io/pypi/pyversions/add-github-issue-prefix.svg)](https://pypi.org/project/add-github-issue-prefix/)
+[![CI](https://github.com/KimSoungRyoul/add-github-issue-prefix/actions/workflows/ci.yaml/badge.svg)](https://github.com/KimSoungRyoul/add-github-issue-prefix/actions/workflows/ci.yaml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 
