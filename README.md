@@ -41,7 +41,7 @@ pip install pre-commit
 ```yaml
 repos:
   - repo: https://github.com/KimSoungRyoul/add-github-issue-prefix
-    rev: v1.0.4
+    rev: v1.1.0
     hooks:
       - id: add-github-issue-prefix
 ```
@@ -61,7 +61,7 @@ You can customize the template and regex pattern:
 ```yaml
 repos:
   - repo: https://github.com/KimSoungRyoul/add-github-issue-prefix
-    rev: v1.0.4
+    rev: v1.1.0
     hooks:
       - id: add-github-issue-prefix
         args:
