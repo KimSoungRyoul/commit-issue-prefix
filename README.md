@@ -80,6 +80,16 @@ repos:
 
 ### Examples
 
+**GitHub-style issue numbers (default):**
+
+```yaml
+args:
+  - --template=[{}]
+  - --regex=#\d{1,5}
+```
+
+This will match branches like `feature/#123-description` and create prefix `[#123]`.
+
 **JIRA-style issue numbers:**
 
 ```yaml
