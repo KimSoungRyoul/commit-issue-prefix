@@ -1,10 +1,10 @@
-"""Tests for add_github_issue_prefix.main module."""
+"""Tests for commit_issue_prefix.main module."""
 
 from pathlib import Path
 
 import pytest
 
-from add_github_issue_prefix.main import extract_issue_number, update_commit_message
+from commit_issue_prefix.main import extract_issue_number, update_commit_message
 
 
 class TestExtractIssueNumber:
@@ -78,4 +78,3 @@ class TestUpdateCommitMessage:
 
         assert result is True
         assert msg_file.read_text() == "[#123] "
-

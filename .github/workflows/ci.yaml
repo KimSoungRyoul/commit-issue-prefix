@@ -55,7 +55,7 @@ jobs:
           echo "Test commit message" > /tmp/COMMIT_MSG
           
           # Run the hook with a branch name containing issue number
-          uv run add-github-issue-prefix /tmp/COMMIT_MSG --regex='#\d+' --template='[{}]'
+          uv run commit-issue-prefix /tmp/COMMIT_MSG --regex='#\d+' --template='[{}]'
           
           # The message should remain unchanged (no branch context in CI)
           cat /tmp/COMMIT_MSG

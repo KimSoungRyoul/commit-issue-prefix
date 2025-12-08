@@ -1,10 +1,12 @@
-# add-github-issue-prefix
+# commit-issue-prefix
 
-[![CI](https://github.com/KimSoungRyoul/add-github-issue-prefix/actions/workflows/ci.yaml/badge.svg)](https://github.com/KimSoungRyoul/add-github-issue-prefix/actions/workflows/ci.yaml)
+[![CI](https://github.com/KimSoungRyoul/commit-issue-prefix/actions/workflows/ci.yaml/badge.svg)](https://github.com/KimSoungRyoul/commit-issue-prefix/actions/workflows/ci.yaml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 
-A pre-commit hook that automatically adds GitHub issue number prefix to your commit messages based on branch name.
+A pre-commit hook that automatically adds issue number prefix to your commit messages based on branch name.
+
+Supports **GitHub**, **JIRA**, **GitLab**, **Linear**, and any custom issue pattern.
 
 For people who always say "oh I forgot to prefix the commit message!"
 
@@ -15,9 +17,9 @@ The hook extracts the issue number from your branch name and prepends it to your
 | Branch Name | Commit Message | Result |
 |-------------|----------------|--------|
 | `feat/#111` | `Add new feature` | `[#111] Add new feature` |
-| `feature/#111` | `Add new feature` | `[#111] Add new feature` |
+| `feature/ABC-123-impl` | `Add feature` | `[ABC-123] Add feature` |
 | `fix/#111-hello-branch` | `Fix bug` | `[#111] Fix bug` |
-| `chore/#111-run-autoflake` | `Run linter` | `[#111] Run linter` |
+| `chore/PROJ-456-cleanup` | `Cleanup` | `[PROJ-456] Cleanup` |
 
 ## Quick Start
 
@@ -40,10 +42,10 @@ pip install pre-commit
 
 ```yaml
 repos:
-  - repo: https://github.com/KimSoungRyoul/add-github-issue-prefix
+  - repo: https://github.com/KimSoungRyoul/commit-issue-prefix
     rev: v1.1.0
     hooks:
-      - id: add-github-issue-prefix
+      - id: commit-issue-prefix
 ```
 
 2. Install the hook:
@@ -60,10 +62,10 @@ You can customize the template and regex pattern:
 
 ```yaml
 repos:
-  - repo: https://github.com/KimSoungRyoul/add-github-issue-prefix
+  - repo: https://github.com/KimSoungRyoul/commit-issue-prefix
     rev: v1.1.0
     hooks:
-      - id: add-github-issue-prefix
+      - id: commit-issue-prefix
         args:
           - --template=[{}]      # default: [{}]
           - --regex=#\d{1,5}     # default: #\d{1,5}
@@ -102,8 +104,8 @@ This will create prefix `(#123)` instead of `[#123]`.
 
 ```bash
 # Clone the repository
-git clone https://github.com/KimSoungRyoul/add-github-issue-prefix.git
-cd add-github-issue-prefix
+git clone https://github.com/KimSoungRyoul/commit-issue-prefix.git
+cd commit-issue-prefix
 
 # Install dependencies
 uv sync --extra dev

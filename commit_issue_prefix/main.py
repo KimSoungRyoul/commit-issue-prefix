@@ -1,4 +1,4 @@
-"""Pre-commit hook to automatically add GitHub issue number prefix to commit messages."""
+"""Pre-commit hook to automatically add issue number prefix to commit messages."""
 
 from __future__ import annotations
 
@@ -72,7 +72,7 @@ def main() -> int:
         Exit code (0: success).
     """
     parser = argparse.ArgumentParser(
-        description="Automatically add GitHub issue number prefix to commit messages."
+        description="Automatically add issue number prefix to commit messages."
     )
     parser.add_argument(
         "commit_msg_filepath",
