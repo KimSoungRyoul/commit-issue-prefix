@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: uv sync --extra dev
+
+      - name: Run linter
+        run: uv run ruff check .
+
+      - name: Run tests
+        run: uv run pytest -v
+
+  pre-commit-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install package
+        run: uv sync
+
+      - name: Test hook execution
+        run: |
+          # Create a test commit message file
+          echo "Test commit message" > /tmp/COMMIT_MSG
+          
+          # Run the hook with a branch name containing issue number
+          uv run commit-issue-prefix /tmp/COMMIT_MSG --regex='#\d+' --template='[{}]'
+          
+          # The message should remain unchanged (no branch context in CI)
+          cat /tmp/COMMIT_MSG
+
