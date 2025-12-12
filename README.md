@@ -43,7 +43,7 @@ pip install pre-commit
 ```yaml
 repos:
   - repo: https://github.com/KimSoungRyoul/commit-issue-prefix
-    rev: v1.1.0
+    rev: v1.2.0
     hooks:
       - id: commit-issue-prefix
 ```
@@ -63,7 +63,7 @@ You can customize the template, regex pattern, and position:
 ```yaml
 repos:
   - repo: https://github.com/KimSoungRyoul/commit-issue-prefix
-    rev: v1.1.0
+    rev: v1.2.0
     hooks:
       - id: commit-issue-prefix
         args:

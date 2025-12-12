@@ -56,7 +56,8 @@ def update_commit_message(filepath: Path, prefix: str, suffix: bool = False) -> 
         True if message was updated, False otherwise.
     """
     content = filepath.read_text(encoding="utf-8")
-    first_line = content.split("\n", maxsplit=1)[0].strip()
+    parts = content.split("\n", maxsplit=1)
+    first_line = parts[0].strip()
 
     # Don't add if prefix already exists
     if prefix in first_line:
@@ -64,12 +65,13 @@ def update_commit_message(filepath: Path, prefix: str, suffix: bool = False) -> 
 
     if suffix:
         # Add as suffix: "message [#123]"
-        lines = content.split("\n", maxsplit=1)
-        first_line = lines[0].rstrip()
+        # Use len(parts) > 1 instead of checking if rest is truthy
+        # to preserve trailing newlines (e.g., "Fix bug\n" -> ["Fix bug", ""])
+        first_line = parts[0].rstrip()
         new_content = f"{first_line} {prefix}" if first_line else prefix
-        if len(lines) > 1:
+        if len(parts) > 1:
             # Preserve the newline and any content after it (even if empty)
-            new_content += "\n" + lines[1]
+            new_content += "\n" + parts[1]
         filepath.write_text(new_content, encoding="utf-8")
     else:
         # Add as prefix: "[#123] message"

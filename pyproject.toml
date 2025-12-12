@@ -1,6 +1,6 @@
 [project]
 name = "commit-issue-prefix"
-version = "v1.1.0"
+version = "v1.2.0"
 description = "Automatically add issue number prefix to commit messages based on branch name. Supports GitHub, JIRA, GitLab, and any custom pattern."
 readme = "README.md"
 license = { file = "LICENSE.md" }
