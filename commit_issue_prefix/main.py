@@ -44,12 +44,13 @@ def extract_issue_number(branch: str, regex_pattern: str) -> str | None:
     return None
 
 
-def update_commit_message(filepath: Path, prefix: str) -> bool:
-    """Add prefix to commit message file.
+def update_commit_message(filepath: Path, prefix: str, suffix: bool = False) -> bool:
+    """Add prefix or suffix to commit message file.
 
     Args:
         filepath: Path to commit message file.
-        prefix: Prefix to add.
+        prefix: Prefix/suffix to add.
+        suffix: If True, add as suffix instead of prefix.
 
     Returns:
         True if message was updated, False otherwise.
@@ -61,7 +62,18 @@ def update_commit_message(filepath: Path, prefix: str) -> bool:
     if prefix in first_line:
         return False
 
-    filepath.write_text(f"{prefix} {content}", encoding="utf-8")
+    if suffix:
+        # Add as suffix: "message [#123]"
+        lines = content.split("\n", maxsplit=1)
+        first_line = lines[0].rstrip()
+        rest = lines[1] if len(lines) > 1 else ""
+        new_content = f"{first_line} {prefix}"
+        if rest:
+            new_content += "\n" + rest
+        filepath.write_text(new_content, encoding="utf-8")
+    else:
+        # Add as prefix: "[#123] message"
+        filepath.write_text(f"{prefix} {content}", encoding="utf-8")
     return True
 
 
@@ -91,6 +103,13 @@ def main() -> int:
         default="[{}]",
         help="Commit message template (default: [{}] -> [#111]).",
     )
+    parser.add_argument(
+        "-s",
+        "--suffix",
+        type=lambda x: x.lower() == "true",
+        default=False,
+        help="Add issue number as suffix instead of prefix (default: false).",
+    )
     args = parser.parse_args()
 
     branch = get_current_branch()
@@ -104,7 +123,7 @@ def main() -> int:
         return 0
 
     prefix = args.template.format(issue_number)
-    update_commit_message(args.commit_msg_filepath, prefix)
+    update_commit_message(args.commit_msg_filepath, prefix, args.suffix)
 
     return 0
 

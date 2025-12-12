@@ -14,12 +14,12 @@ For people who always say "oh I forgot to prefix the commit message!"
 
 The hook extracts the issue number from your branch name and prepends it to your commit message.
 
-| Branch Name | Commit Message | Result |
-|-------------|----------------|--------|
-| `feat/#111` | `Add new feature` | `[#111] Add new feature` |
-| `feature/ABC-123-impl` | `Add feature` | `[ABC-123] Add feature` |
-| `fix/#111-hello-branch` | `Fix bug` | `[#111] Fix bug` |
-| `chore/PROJ-456-cleanup` | `Cleanup` | `[PROJ-456] Cleanup` |
+| Branch Name | Commit Message | Result (default) | Result (--suffix=true) |
+|-------------|----------------|------------------|------------------------|
+| `feat/#111` | `Add new feature` | `[#111] Add new feature` | `Add new feature [#111]` |
+| `feature/ABC-123-impl` | `Add feature` | `[ABC-123] Add feature` | `Add feature [ABC-123]` |
+| `fix/#111-hello-branch` | `Fix bug` | `[#111] Fix bug` | `Fix bug [#111]` |
+| `chore/PROJ-456-cleanup` | `Cleanup` | `[PROJ-456] Cleanup` | `Cleanup [PROJ-456]` |
 
 ## Quick Start
 
@@ -58,7 +58,7 @@ pre-commit install --hook-type prepare-commit-msg
 
 ## Configuration
 
-You can customize the template and regex pattern:
+You can customize the template, regex pattern, and position:
 
 ```yaml
 repos:
@@ -69,6 +69,7 @@ repos:
         args:
           - --template=[{}]      # default: [{}]
           - --regex=#\d{1,5}     # default: #\d{1,5}
+          - --suffix=true        # default: false
 ```
 
 ### Options
@@ -77,6 +78,7 @@ repos:
 |--------|---------|-------------|
 | `--template` | `[{}]` | Template for the prefix. `{}` is replaced with the issue number. |
 | `--regex` | `#\d{1,5}` | Regex pattern to extract issue number from branch name. |
+| `--suffix` | `false` | If `true`, adds issue number as suffix instead of prefix. |
 
 ### Examples
 
@@ -109,6 +111,17 @@ args:
 ```
 
 This will create prefix `(#123)` instead of `[#123]`.
+
+**Issue number as suffix:**
+
+```yaml
+args:
+  - --template=[{}]
+  - --regex=#\d{1,5}
+  - --suffix=true
+```
+
+This will add the issue number at the end: `Add new feature [#123]`.
 
 ## Development
 
