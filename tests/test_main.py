@@ -128,3 +128,13 @@ class TestUpdateCommitMessage:
 
         assert result is True
         assert msg_file.read_text() == "Fix bug [#456]\n"
+
+    def test_empty_message_with_suffix(self, tmp_path: Path) -> None:
+        """Test with empty commit message in suffix mode."""
+        msg_file = tmp_path / "COMMIT_EDITMSG"
+        msg_file.write_text("")
+
+        result = update_commit_message(msg_file, "[#123]", suffix=True)
+
+        assert result is True
+        assert msg_file.read_text() == "[#123]"
