@@ -66,10 +66,10 @@ def update_commit_message(filepath: Path, prefix: str, suffix: bool = False) -> 
         # Add as suffix: "message [#123]"
         lines = content.split("\n", maxsplit=1)
         first_line = lines[0].rstrip()
-        rest = lines[1] if len(lines) > 1 else ""
         new_content = f"{first_line} {prefix}"
-        if rest:
-            new_content += "\n" + rest
+        if len(lines) > 1:
+            # Preserve the newline and any content after it (even if empty)
+            new_content += "\n" + lines[1]
         filepath.write_text(new_content, encoding="utf-8")
     else:
         # Add as prefix: "[#123] message"

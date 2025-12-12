@@ -118,3 +118,13 @@ class TestUpdateCommitMessage:
 
         assert result is True
         assert msg_file.read_text() == "Add feature [#789]\n\nDescription"
+
+    def test_add_suffix_single_line_with_trailing_newline(self, tmp_path: Path) -> None:
+        """Test adding suffix to single line with trailing newline."""
+        msg_file = tmp_path / "COMMIT_EDITMSG"
+        msg_file.write_text("Fix bug\n")
+
+        result = update_commit_message(msg_file, "[#456]", suffix=True)
+
+        assert result is True
+        assert msg_file.read_text() == "Fix bug [#456]\n"
