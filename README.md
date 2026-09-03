@@ -115,7 +115,14 @@ SH
 chmod +x .git/hooks/prepare-commit-msg
 ```
 
-## Changes in v1.3.0
+## Changes
+
+### v1.3.1
+
+- The first line is rewritten in plain `sh` instead of `awk`. On Git for Windows `awk` dropped the CR of
+  CRLF messages; the line ending is now preserved on every platform (covered by the Windows CI job).
+
+### v1.3.0
 
 - The hook is a single POSIX `sh` script (`language: script`). No Python runtime is needed any more;
   the Python package is gone from the repository. The hook id, the defaults and the v1 options

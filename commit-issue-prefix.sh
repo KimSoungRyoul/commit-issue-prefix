@@ -250,25 +250,38 @@ fi
 tmp="$msg_file.commit-issue-prefix.tmp"
 trap 'rm -f "$tmp"' EXIT
 
-CIP_PREFIX=$prefix CIP_ISSUE_PART=$issue_part CIP_SUFFIX=$suffix awk '
-  NR == 1 {
-    # Keep a CRLF line ending (editors on Windows) where it was.
-    cr = ""
-    if (sub(/\r$/, "")) cr = "\r"
-    if (ENVIRON["CIP_SUFFIX"] == "true") {
-      sub(/[ \t]+$/, "")
-      $0 = (($0 == "") ? ENVIRON["CIP_ISSUE_PART"] : $0 " " ENVIRON["CIP_ISSUE_PART"]) cr
-    } else if ($0 ~ /^#/) {
-      # The file starts with a comment (commit template): give the prefix its own first line so
-      # the author types the subject after it instead of inside the comment.
-      print ENVIRON["CIP_PREFIX"] " " cr
-      $0 = $0 cr
-    } else {
-      $0 = ENVIRON["CIP_PREFIX"] " " $0 cr
-    }
-  }
-  { print }
-' "$msg_file" > "$tmp"
+# Rewrite the first line in plain sh (no awk: on Git for Windows awk drops the CR of CRLF input).
+# `read` takes the first line, `cat` copies the rest byte for byte.
+cr_char=$(printf '\r')
+tab_char=$(printf '\t')
+{
+  if IFS= read -r line || [ -n "$line" ]; then
+    cr=''
+    case $line in
+      *"$cr_char") cr=$cr_char; line=${line%"$cr_char"} ;;
+    esac
+    if [ "$suffix" = true ]; then
+      while :; do
+        case $line in
+          *' ' | *"$tab_char") line=${line%?} ;;
+          *) break ;;
+        esac
+      done
+      if [ -z "$line" ]; then line=$issue_part; else line="$line $issue_part"; fi
+    else
+      case $line in
+        '#'*)
+          # The file starts with a comment (commit template): give the prefix its own first line so
+          # the author types the subject after it instead of inside the comment.
+          printf '%s %s\n' "$prefix" "$cr"
+          ;;
+        *) line="$prefix $line" ;;
+      esac
+    fi
+    printf '%s%s\n' "$line" "$cr"
+  fi
+  cat
+} < "$msg_file" > "$tmp"
 mv -f "$tmp" "$msg_file"
 trap - EXIT
 exit 0
