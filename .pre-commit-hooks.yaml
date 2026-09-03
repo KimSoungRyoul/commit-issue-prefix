@@ -1,7 +1,7 @@
 - id: commit-issue-prefix
-  name: Commit Issue Prefix
-  description: Automatically add issue number prefix to commit messages
-  entry: commit-issue-prefix
-  language: python
+  name: commit-issue-prefix
+  description: Prefix the commit message with the issue token (and optional type) taken from the branch name
+  entry: commit-issue-prefix.sh
+  language: script
   stages: [prepare-commit-msg]
   always_run: true

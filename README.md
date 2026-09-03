@@ -1,143 +1,132 @@
 # commit-issue-prefix
 
-[![CI](https://github.com/KimSoungRyoul/add-github-issue-prefix/actions/workflows/ci.yaml/badge.svg)](https://github.com/KimSoungRyoul/add-github-issue-prefix/actions/workflows/ci.yaml)
+[![CI](https://github.com/KimSoungRyoul/commit-issue-prefix/actions/workflows/ci.yaml/badge.svg)](https://github.com/KimSoungRyoul/commit-issue-prefix/actions/workflows/ci.yaml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 
-A pre-commit hook that automatically adds issue number prefix to your commit messages based on branch name.
+A `prepare-commit-msg` hook that prefixes your commit message with the issue number taken from
+the branch name, and optionally with the change type.
 
-Supports **GitHub**, **JIRA**, **GitLab**, **Linear**, and any custom issue pattern.
+One POSIX `sh` script. No Python, no Node: it runs wherever `git` runs (Linux, macOS, Windows via Git for Windows' `sh`), under
+[prek](https://github.com/j178/prek) or [pre-commit](https://pre-commit.com/).
 
 For people who always say "oh I forgot to prefix the commit message!"
 
-## How It Works
+## How it works
 
-The hook extracts the issue number from your branch name and prepends it to your commit message.
+| Branch | Args | You type | Result |
+|---|---|---|---|
+| `feat/#111` | (defaults) | `Add new feature` | `[#111] Add new feature` |
+| `feat/#111` | `--types feat,fix` | `Add new feature` | `[#111] feat: Add new feature` |
+| `20266-fix-side-panel` | `--issue-regex '^[0-9]+' --template '[#{issue}]' --types feat,fix` | `Fix stacking` | `[#20266] fix: Fix stacking` |
+| `feature/ABC-123-impl` | `--issue-regex '[A-Z]+-[0-9]+'` | `Add feature` | `[ABC-123] Add feature` |
+| `feat/#111` | `--suffix` | `Add feature` | `Add feature [#111]` |
 
-| Branch Name | Commit Message | Result (default) | Result (--suffix=true) |
-|-------------|----------------|------------------|------------------------|
-| `feat/#111` | `Add new feature` | `[#111] Add new feature` | `Add new feature [#111]` |
-| `feature/ABC-123-impl` | `Add feature` | `[ABC-123] Add feature` | `Add feature [ABC-123]` |
-| `fix/#111-hello-branch` | `Fix bug` | `[#111] Fix bug` | `Fix bug [#111]` |
-| `chore/PROJ-456-cleanup` | `Cleanup` | `[PROJ-456] Cleanup` | `Cleanup [PROJ-456]` |
+The hook only adds text. It never rejects a commit.
 
-## Quick Start
+## Quick start
 
-### Prerequisites
-
-- Python 3.9+
-- [pre-commit](https://pre-commit.com/)
-
-```bash
-# Install pre-commit (macOS)
-brew install pre-commit
-
-# Or using pip
-pip install pre-commit
-```
-
-### Installation
-
-1. Create `.pre-commit-config.yaml` in your repository root:
+`.pre-commit-config.yaml`:
 
 ```yaml
+default_install_hook_types: [pre-commit, prepare-commit-msg]
+default_stages: [pre-commit]   # keeps your pre-commit hooks from running again at the prepare-commit-msg stage
+
 repos:
   - repo: https://github.com/KimSoungRyoul/commit-issue-prefix
-    rev: v1.2.0
+    rev: v1.3.0
     hooks:
       - id: commit-issue-prefix
 ```
 
-2. Install the hook:
+Then install the hooks once per clone:
 
 ```bash
-pre-commit install --hook-type prepare-commit-msg
+prek install          # or: pre-commit install
 ```
 
-3. Done! Now when you commit, the hook will automatically add the issue prefix.
+Both tools read `default_install_hook_types` and install the `prepare-commit-msg` shim for you.
+Without that key you need `prek install --hook-type prepare-commit-msg` (same flag for pre-commit).
 
-## Configuration
+## Options
 
-You can customize the template, regex pattern, and position:
+Pass them through `args:`.
 
-```yaml
-repos:
-  - repo: https://github.com/KimSoungRyoul/commit-issue-prefix
-    rev: v1.2.0
-    hooks:
-      - id: commit-issue-prefix
-        args:
-          - --template=[{}]      # default: [{}]
-          - --regex=#\d{1,5}     # default: #\d{1,5}
-          - --suffix=true        # default: false
-```
-
-### Options
-
-| Option | Default | Description |
-|--------|---------|-------------|
-| `--template` | `[{}]` | Template for the prefix. `{}` is replaced with the issue number. |
-| `--regex` | `#\d{1,5}` | Regex pattern to extract issue number from branch name. |
-| `--suffix` | `false` | If `true`, adds issue number as suffix instead of prefix. |
+| Option | Default | Meaning |
+|---|---|---|
+| `-r`, `--issue-regex <ERE>` | `#[0-9]{1,5}` | POSIX extended regex that finds the issue token in the branch name. The first match wins. `--regex` is accepted as an alias. |
+| `-t`, `--template <text>` | `[{issue}]` | Issue part. `{issue}` is replaced by the token (upper-cased, so `abc-123` becomes `ABC-123`). `{}` still works as in v1. |
+| `--types <a,b,...>` | (empty) | Enables type detection. The type is the branch segment before the first `/` (`fix/#111-x`) or the segment right after the issue token (`20266-fix-x`). Slug words are never taken as a type. |
+| `--type-template <text>` | `{type}:` | Type part, written after the issue part when a type was found. `''` disables it. |
+| `-s`, `--suffix [true\|false]` | `false` | Append the issue part to the end of the first line instead. The type part is not used in suffix mode. |
+| `-q`, `--quiet` | | Do not print the notice for "issue found, but no type segment". |
 
 ### Examples
 
-**GitHub-style issue numbers (default):**
+Issue number and type from a branch named `<issue>-<type>-<slug>` (the convention this hook was
+written for, e.g. `20266-fix-side-panel-stacking`):
 
 ```yaml
-args:
-  - --template=[{}]
-  - --regex=#\d{1,5}
+      - id: commit-issue-prefix
+        args:
+          - '--issue-regex=^[0-9]+'
+          - '--template=[#{issue}]'
+          - '--types=feat,fix,refactor,chore,docs,test,perf,build,ci,revert,style'
 ```
 
-This will match branches like `feature/#123-description` and create prefix `[#123]`.
-
-**JIRA-style issue numbers:**
+JIRA keys, prefix in parentheses:
 
 ```yaml
-args:
-  - --template=[{}]
-  - --regex=[A-Z]+-\d+
+        args: ['--issue-regex=[A-Z]+-[0-9]+', '--template=({issue})']
 ```
 
-This will match branches like `feature/ABC-123-description` and create prefix `[ABC-123]`.
-
-**Different prefix format:**
+Issue as a suffix:
 
 ```yaml
-args:
-  - --template=({})
-  - --regex=#\d{1,5}
+        args: ['--suffix']
 ```
 
-This will create prefix `(#123)` instead of `[#123]`.
+## When nothing is written
 
-**Issue number as suffix:**
+- The branch has no issue token, or HEAD is detached (rebase in progress).
+- A merge or squash is in progress: `.git/MERGE_HEAD` or `.git/SQUASH_MSG` exists, or git/pre-commit
+  reports the message source as `merge` or `squash`. Merge commits keep git's own message.
+- The first line already contains the issue part, so `git commit --amend` is safe.
 
-```yaml
-args:
-  - --template=[{}]
-  - --regex=#\d{1,5}
-  - --suffix=true
+When `--types` is set but the branch has no type segment, the issue part is still written and a
+one-line notice goes to stderr (silence it with `--quiet`).
+
+If the message file starts with a comment line (a commit template), the prefix gets its own first
+line so you type the subject after it instead of inside the comment.
+
+## Use as a plain git hook
+
+The script also works without prek or pre-commit. git passes the message file, the source and the
+commit SHA; extra options go in a two-line wrapper:
+
+```bash
+cat > .git/hooks/prepare-commit-msg <<'SH'
+#!/bin/sh
+exec /path/to/commit-issue-prefix.sh --types feat,fix "$@"
+SH
+chmod +x .git/hooks/prepare-commit-msg
 ```
 
-This will add the issue number at the end: `Add new feature [#123]`.
+## Changes in v1.3.0
+
+- The hook is a single POSIX `sh` script (`language: script`). No Python runtime is needed any more;
+  the Python package is gone from the repository. The hook id, the defaults and the v1 options
+  (`--regex`, `{}`, `--suffix true`) are unchanged, so bumping `rev` is enough.
+- New: `--types` and `--type-template` add the change type taken from the branch name.
+- New: merge and squash commits are left alone; a message that starts with a comment line gets the
+  prefix on its own line; `--suffix` works as a bare flag.
+- A missing message file is a usage error (exit 2) instead of being created.
 
 ## Development
 
 ```bash
-# Clone the repository
-git clone https://github.com/KimSoungRyoul/commit-issue-prefix.git
-cd commit-issue-prefix
-
-# Install dependencies
-uv sync --extra dev
-
-# Run tests
-uv run pytest
-
-# Run linter
-uv run ruff check .
+shellcheck -s sh commit-issue-prefix.sh tests/test.sh
+sh tests/test.sh        # also: bash tests/test.sh, dash tests/test.sh
 ```
 
 ## License

@@ -8,55 +8,62 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ["3.12", "3.13"]
-
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v4
-        with:
-          version: "latest"
+      - name: Install shellcheck (macOS)
+        if: runner.os == 'macOS'
+        run: brew install shellcheck
 
-      - name: Set up Python ${{ matrix.python-version }}
-        run: uv python install ${{ matrix.python-version }}
+      - name: shellcheck
+        run: shellcheck -s sh commit-issue-prefix.sh tests/test.sh
 
-      - name: Install dependencies
-        run: uv sync --extra dev
+      - name: Tests (sh)
+        run: sh tests/test.sh
 
-      - name: Run linter
-        run: uv run ruff check .
+      - name: Tests (bash)
+        run: bash tests/test.sh
 
-      - name: Run tests
-        run: uv run pytest -v
+      - name: Tests (dash)
+        if: runner.os == 'Linux'
+        run: dash tests/test.sh
 
-  pre-commit-test:
+  test-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Tests (Git for Windows sh)
+        run: sh tests/test.sh
+
+      - name: Tests (Git for Windows bash)
+        run: bash tests/test.sh
+
+  prek-smoke:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v4
-        with:
-          version: "latest"
+      - name: Install prek
+        run: pipx install prek
 
-      - name: Set up Python
-        run: uv python install 3.12
-
-      - name: Install package
-        run: uv sync
-
-      - name: Test hook execution
+      - name: Run the hook through prek on an issue branch
         run: |
-          # Create a test commit message file
-          echo "Test commit message" > /tmp/COMMIT_MSG
-          
-          # Run the hook with a branch name containing issue number
-          uv run commit-issue-prefix /tmp/COMMIT_MSG --regex='#\d+' --template='[{}]'
-          
-          # The message should remain unchanged (no branch context in CI)
-          cat /tmp/COMMIT_MSG
-
+          git config user.name ci
+          git config user.email ci@example.com
+          git checkout -b 'feat/#111'
+          printf 'Add feature\n' > "$RUNNER_TEMP/MSG"
+          prek try-repo . commit-issue-prefix \
+            --hook-stage prepare-commit-msg \
+            --commit-msg-filename "$RUNNER_TEMP/MSG" \
+            --all-files
+          cat "$RUNNER_TEMP/MSG"
+          test "$(head -n 1 "$RUNNER_TEMP/MSG")" = '[#111] Add feature'
