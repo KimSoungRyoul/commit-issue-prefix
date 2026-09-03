@@ -92,6 +92,9 @@ Issue as a suffix:
 - A merge or squash is in progress: `.git/MERGE_HEAD` or `.git/SQUASH_MSG` exists, or git/pre-commit
   reports the message source as `merge` or `squash`. Merge commits keep git's own message.
 - The first line already contains the issue part, so `git commit --amend` is safe.
+- With `--types`, a subject that already starts with a type (`fix(auth): …`, `feat!: …`) keeps it: only the
+  issue part is added, so the type is never written twice. This lets a tool or the author choose the type
+  per commit while the branch supplies the default.
 
 When `--types` is set but the branch has no type segment, the issue part is still written and a
 one-line notice goes to stderr (silence it with `--quiet`).
@@ -118,6 +121,7 @@ chmod +x .git/hooks/prepare-commit-msg
   the Python package is gone from the repository. The hook id, the defaults and the v1 options
   (`--regex`, `{}`, `--suffix true`) are unchanged, so bumping `rev` is enough.
 - New: `--types` and `--type-template` add the change type taken from the branch name.
+  A subject that already starts with a type keeps it; only the issue part is added.
 - New: merge and squash commits are left alone; a message that starts with a comment line gets the
   prefix on its own line; `--suffix` works as a bare flag.
 - A missing message file is a usage error (exit 2) instead of being created.
